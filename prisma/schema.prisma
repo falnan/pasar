@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  username         String     @id
+  email            String     @unique
+  birthday         DateTime?
+  gender           String?
+  name             String
+  adress1          String?
+  adress2          String?
+  adress3          String?
+  createdAt        DateTime   @default(now())
+  cartRelation     Cart[]
+  wishlistRelation Wishlist[]
+}
+
+model Product {
+  id           Int        @id @default(autoincrement())
+  title        String     @db.VarChar(60)
+  slug         String
+  category     String
+  description  String
+  image        String
+  normalPrice  Int
+  dealPrice    Int
+  unit         Unit
+  stock        Int
+  cartRelation Wishlist[] //tak pakai
+}
+
+model Wishlist {
+  id              Int     @id @default(autoincrement())
+  userId          String
+  productId       Int
+  quantity        Int
+  isCheckout      Boolean @default(false)
+  note            String? @db.VarChar(250)
+  cartId          Int?
+  dealPrice       Int?
+  normalPrice     Int?
+  userRelation    User    @relation(fields: [userId], references: [username])
+  productRelation Product @relation(fields: [productId], references: [id])
+  cartRelation    Cart?   @relation(fields: [cartId], references: [id])
+}
+
+model Cart {
+  id               Int            @id @default(autoincrement())
+  status           Status         @default(ordered)
+  isPaid           Boolean        @default(false)
+  paymentMethode   PaymentMethode @default(cod)
+  totalPrice       Int
+  createdAt        DateTime       @default(now())
+  userId           String
+  userRelation     User           @relation(fields: [userId], references: [username])
+  wishlistRelation Wishlist[]
+}
+
+enum Unit {
+  kg
+  buah
+}
+
+enum Status {
+  ordered
+  packed
+  shipped
+  delivered
+}
+
+enum PaymentMethode {
+  cod
+  bsi
+  bri
+  bca
+}
